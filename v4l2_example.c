@@ -47,9 +47,6 @@ struct buffer
  14. VIDIOC_QBUF (把帧放入队列)
  15. VIDIOC_DQBUF (从队列中取出帧)
  16. VIDIOC_STREAMON && VIDIOC_STREAMOFF (启动/停止视频数据流)
-————————————————
-版权声明：本文为CSDN博主「Mark_minGE」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
-原文链接：https://blog.csdn.net/Mark_minGE/article/details/81427489
 */
 
 int v4l2_init()
@@ -272,11 +269,7 @@ int v4l2_mem_ops()
         buffers[n_buffers].start = mmap(NULL, buf.length, PROT_READ | PROT_WRITE, MAP_SHARED, fd, buf.m.offset);
 
         //显示缓存帧信息
-<<<<<<< HEAD
         printf("Frame buffer %d: address=0x%p, length=%d\n", n_buffers, buffers[n_buffers].start, buffers[n_buffers].length);
-=======
-        printf("Frame buffer %d: address=0x%x, length=%d\n", n_buffers, (unsigned int)buffers[n_buffers].start, buffers[n_buffers].length);
->>>>>>> 72894aae13b9a1a4ad857e736fc4862f249cc98e
         if (buffers[n_buffers].start == MAP_FAILED)
         {
             printf("buffer map error\n");
@@ -339,7 +332,6 @@ int v4l2_frame_process()
                 printf("open %s error\n", file_name);
                 return (FALSE);
             }
-<<<<<<< HEAD
             /*
             （1）buffer：是一个指针，对fwrite来说，是要获取数据的地址；
             （2）size：要写入内容的单字节数；
@@ -348,16 +340,7 @@ int v4l2_frame_process()
             （5）返回实际写入的数据项个数count。
 
             */
-=======
-			/*
-			（1）buffer：是一个指针，对fwrite来说，是要获取数据的地址；
-			（2）size：要写入内容的单字节数；
-			（3）count:要进行写入size字节的数据项的个数；
-			（4）stream:目标文件指针；
-			（5）返回实际写入的数据项个数count。
 
-			*/
->>>>>>> 72894aae13b9a1a4ad857e736fc4862f249cc98e
             fwrite(buffers[n_buffers].start, IMAGEHEIGHT * IMAGEWIDTH * 2, 1, file);
             fclose(file);
             printf("save %s OK\n", file_name);
