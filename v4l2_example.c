@@ -30,23 +30,23 @@ struct buffer
 } *buffers;
 
 /*
-常用的VIDIOC命令：
- 1. VIDIOC_QUERYCAP （查询设备属性）
- 2. VIDIOC_ENUM_FMT (显示所有支持的格式)
- 3. VIDIOC_S_FMT （设置视频捕获格式）
- 4. VIDIOC_G_FMT （获取硬件现在的视频捕获格式）
- 5. VIDIOC_TRY_FMT （检查是否支持某种帧格式）
- 6. VIDIOC_ENUM_FRAMESIZES （枚举设备支持的分辨率信息）
- 7. VIDIOC_ENUM_FRAMEINTERVALS (获取设备支持的帧间隔)
- 8. VIDIOC_S_PARM && VIDIOC_G_PARM (设置和获取流参数)
- 9. VIDIOC_QUERYCAP (查询驱动的修剪能力)
- 10. VIDIOC_S_CROP (设置视频信号的边框)
- 11. VIDIOC_G_CROP (读取设备信号的边框)
- 12. VIDIOC_REQBUFS (向设备申请缓存区)
- 13. VIDIOC_QUERYBUF (获取缓存帧的地址、长度)
- 14. VIDIOC_QBUF (把帧放入队列)
- 15. VIDIOC_DQBUF (从队列中取出帧)
- 16. VIDIOC_STREAMON && VIDIOC_STREAMOFF (启动/停止视频数据流)
+���õ�VIDIOC���
+?1. VIDIOC_QUERYCAP ����ѯ�豸���ԣ�
+?2. VIDIOC_ENUM_FMT (��ʾ����֧�ֵĸ�ʽ)
+?3. VIDIOC_S_FMT ��������Ƶ�����ʽ��
+?4. VIDIOC_G_FMT ����ȡӲ�����ڵ���Ƶ�����ʽ��
+?5. VIDIOC_TRY_FMT ������Ƿ�֧��ĳ��֡��ʽ��
+?6. VIDIOC_ENUM_FRAMESIZES ��ö���豸֧�ֵķֱ�����Ϣ��
+?7. VIDIOC_ENUM_FRAMEINTERVALS (��ȡ�豸֧�ֵ�֡���)
+?8. VIDIOC_S_PARM && VIDIOC_G_PARM (���úͻ�ȡ������)
+?9. VIDIOC_QUERYCAP (��ѯ�������޼�����)
+?10. VIDIOC_S_CROP (������Ƶ�źŵı߿�)
+?11. VIDIOC_G_CROP (��ȡ�豸�źŵı߿�)
+?12. VIDIOC_REQBUFS (���豸���뻺����)
+?13. VIDIOC_QUERYBUF (��ȡ����֡�ĵ�ַ������)
+?14. VIDIOC_QBUF (��֡�������)
+?15. VIDIOC_DQBUF (�Ӷ�����ȡ��֡)
+?16. VIDIOC_STREAMON && VIDIOC_STREAMOFF (����/ֹͣ��Ƶ������)
 */
 
 int v4l2_init()
@@ -56,14 +56,14 @@ int v4l2_init()
     struct v4l2_format fmt;
     struct v4l2_streamparm stream_para;
 
-    //打开摄像头设备
+    //������ͷ�豸
     if ((fd = open(FILE_VIDEO, O_RDWR)) == -1)
     {
         printf("Error opening V4L interface\n");
         return FALSE;
     }
 
-    //查询设备属性
+    //��ѯ�豸����
     if (ioctl(fd, VIDIOC_QUERYCAP, &cap) == -1)
     {
         printf("Error opening device %s: unable to query device.\n", FILE_VIDEO);
@@ -74,12 +74,12 @@ int v4l2_init()
         /*
         struct v4l2_capability
         {
-          __u8  driver[16];        // 驱动名字
-          __u8  card[32];          // 设备名字
-          __u8  bus_info[32];      // 设备在系统中的位置
-          __u32 version;           // 驱动版本号
-          __u32 capabilities;      // 设备支持的操作
-          __u32 reserved[4];       // 保留字段
+          __u8  driver[16];        // ��������
+          __u8  card[32];          // �豸����
+          __u8  bus_info[32];      // �豸��ϵͳ�е�λ��
+          __u32 version;           // �����汾��
+          __u32 capabilities;      // �豸֧�ֵĲ���
+          __u32 reserved[4];       // �����ֶ�
         };
         */
         printf("driver:\t\t%s\n", cap.driver);
@@ -87,28 +87,28 @@ int v4l2_init()
         printf("bus_info:\t%s\n", cap.bus_info);
         printf("version:\t%d\n", cap.version);
         printf("capabilities:\t%x\n", cap.capabilities);
-//在实际操作过程中，可以将取得的 capabilites 与这些宏进行与远算来判断设备是否支持相应的功能。
+//��ʵ�ʲ��������У����Խ�ȡ�õ� capabilites ����Щ�������Զ�����ж��豸�Ƿ�֧����Ӧ�Ĺ��ܡ�
 
-//V4L2_CAP_VIDEO_CAPTURE 是否支持图像获取
+//V4L2_CAP_VIDEO_CAPTURE �Ƿ�֧��ͼ���ȡ
         if ((cap.capabilities & V4L2_CAP_VIDEO_CAPTURE) == V4L2_CAP_VIDEO_CAPTURE)
         {
             printf("Device %s: Is a video capture device.\n", FILE_VIDEO);
         }
 
-// 这个设备支持 video output 的接口，即这个设备具备 video output 的功能
+// ����豸֧�� video output �Ľӿڣ�������豸�߱� video output �Ĺ���
         if ((cap.capabilities & V4L2_CAP_VIDEO_OUTPUT) == V4L2_CAP_VIDEO_OUTPUT)
         {
             printf("Device %s: Is a video output device.\n", FILE_VIDEO);
         }
 
-// 这个设备支持 video overlay 的接口，即这个设备具备 video overlay 的功能，
-//imag 在视频设备的 meomory 中保存，并直接在屏幕上显示，而不需要经过其他的处理。
+// ����豸֧�� video overlay �Ľӿڣ�������豸�߱� video overlay �Ĺ��ܣ�
+//imag ����Ƶ�豸�� meomory �б��棬��ֱ������Ļ����ʾ��������Ҫ���������Ĵ�����
         if ((cap.capabilities & V4L2_CAP_VIDEO_OVERLAY) == V4L2_CAP_VIDEO_OVERLAY)
         {
             printf("Device %s: Can do video overlay.\n", FILE_VIDEO);
         }
 
-// 这个设备是否支持 read() 和 write() I/O 操作函数
+// ����豸�Ƿ�֧�� read() �� write() I/O ��������
         if ((cap.capabilities & V4L2_CAP_READWRITE) == V4L2_CAP_READWRITE)
         {
             printf("Device %s: Is a read/write systemcalls device.\n", FILE_VIDEO);
@@ -124,7 +124,7 @@ int v4l2_init()
             printf("Device %s: Is a video output device that supports multiplanar formats .\n", FILE_VIDEO);
         }
 
-// 这个设备是否支持 streaming I/O 操作函数
+// ����豸�Ƿ�֧�� streaming I/O ��������
         if ((cap.capabilities & V4L2_CAP_STREAMING) == V4L2_CAP_STREAMING)
         {
             printf("Device %s: supports streaming.\n", FILE_VIDEO);
@@ -132,24 +132,24 @@ int v4l2_init()
     }
 
     /*
-    //相关的结构体：
+    //��صĽṹ�壺
     struct v4l2_fmtdesc
     {
-      __u32  index;                // 要查询的格式序号，应用程序设置
-      enum   v4l2_buf_type type;   // 帧类型，应用程序设置
-      __u32  flags;                // 是否为压缩格式
-      __u8   description[32];      // 格式名称
-      __u32  pixelformat;          // 格式
-      __u32  reserved[4];         // 保留，不使用设置为0
+      __u32  index;                // Ҫ��ѯ�ĸ�ʽ��ţ�Ӧ�ó�������
+      enum   v4l2_buf_type type;   // ֡���ͣ�Ӧ�ó�������
+      __u32  flags;                // �Ƿ�Ϊѹ����ʽ
+      __u8   description[32];      // ��ʽ����
+      __u32  pixelformat;          // ��ʽ
+      __u32  reserved[4];         // ��������ʹ������Ϊ0
     };
-    参数分析：
-      1. index ：是用来确定格式的一个简单整型数。与其他V4L2所使用的索引一样，这个也是从0开始递增，至最大允许值为止。应用可以通过一直递增索引值知道返回-EINVAL的方式枚举所有支持的格式。
-      2. type：是描述数据流类型的字段。对于视频捕获设备（摄像头或调谐器）来说，就是V4L2_BUF_TYPE_VIDEO_CAPTURE。
-      3. flags: 只定义了一个值，即V4L2_FMT_FLAG_COMPRESSED，表示这是一个压缩的视频格式。
-      4. description: 是对这个格式的一种简短的字符串描述。
-      5. pixelformat: 应是描述视频表现方式的四字符码
+    ����������
+    ??1. index ��������ȷ����ʽ��һ������������������V4L2��ʹ�õ�����һ�������Ҳ�Ǵ�0��ʼ���������������ֵΪֹ��Ӧ�ÿ���ͨ��һֱ��������ֵ֪������-EINVAL�ķ�ʽö������֧�ֵĸ�ʽ��
+    ??2. type�����������������͵��ֶΡ�������Ƶ�����豸������ͷ���г������˵������V4L2_BUF_TYPE_VIDEO_CAPTURE��
+    ??3. flags: ֻ������һ��ֵ����V4L2_FMT_FLAG_COMPRESSED����ʾ����һ��ѹ������Ƶ��ʽ��
+    ??4. description: �Ƕ������ʽ��һ�ּ�̵��ַ���������
+    ??5. pixelformat: Ӧ��������Ƶ���ַ�ʽ�����ַ���
     */
-    //显示所有支持帧格式
+    //��ʾ����֧��֡��ʽ
     fmtdesc.index = 0;
     fmtdesc.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     printf("Support format:\n");
@@ -159,7 +159,7 @@ int v4l2_init()
         fmtdesc.index++;
     }
 
-    //VIDIOC_TRY_FMT 检查是否支持某帧格式
+    //VIDIOC_TRY_FMT ����Ƿ�֧��ĳ֡��ʽ
     struct v4l2_format fmt_test;
     fmt_test.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     fmt_test.fmt.pix.pixelformat = V4L2_PIX_FMT_RGB32;
@@ -172,10 +172,10 @@ int v4l2_init()
         printf("support format RGB32\n");
     }
 
-    // VIDIO_S_FMT 操作命令设置视频捕捉格式。
+    // VIDIO_S_FMT ��������������Ƶ��׽��ʽ��
     printf("set fmt...\n");
     fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_RGB32; //jpg格式 V4L2_PIX_FMT_RGB32 V4L2_PIX_FMT_YUYV;//yuv格式
+    fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_RGB32; //jpg��ʽ V4L2_PIX_FMT_RGB32 V4L2_PIX_FMT_YUYV;//yuv��ʽ
     fmt.fmt.pix.height = IMAGEHEIGHT;
     fmt.fmt.pix.width = IMAGEWIDTH;
     fmt.fmt.pix.field = V4L2_FIELD_INTERLACED;
@@ -190,7 +190,7 @@ int v4l2_init()
         return FALSE;
     }
 
-    //.VIDIOC_G_FMT 获取硬件现在的视频捕获格式
+    //.VIDIOC_G_FMT ��ȡӲ�����ڵ���Ƶ�����ʽ
     printf("get fmt...\n");
     if (ioctl(fd, VIDIOC_G_FMT, &fmt) == -1)
     {
@@ -205,7 +205,7 @@ int v4l2_init()
         printf("pix.field:\t\t%d\n", fmt.fmt.pix.field);
     }
 
-    //设置及查看帧速率，这里只能是30帧，就是1秒采集30张图
+    //���ü��鿴֡���ʣ�����ֻ����30֡������1��ɼ�30��ͼ
     memset(&stream_para, 0, sizeof(struct v4l2_streamparm));
     stream_para.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     stream_para.parm.capture.timeperframe.denominator = 30;
@@ -233,17 +233,17 @@ int v4l2_mem_ops()
     unsigned int n_buffers;
     struct v4l2_requestbuffers req;
 
-    //申请帧缓冲   VIDIOC_REQBUFS 向设备申请缓存区
-    req.count = FRAME_NUM;                  // 缓存数量，也就是说在缓存队列里保持多少张照片
-    req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE; //数据流类型，对视频捕获设备应是V4L2_BUF_TYPE_VIDEO_CAPTURE
-    req.memory = V4L2_MEMORY_MMAP;          // V4L2_MEMORY_MMAP 或 V4L2_MEMORY_USERPTR
+    //����֡����   VIDIOC_REQBUFS ���豸���뻺����
+    req.count = FRAME_NUM;                  // ����������Ҳ����˵�ڻ�������ﱣ�ֶ�������Ƭ
+    req.type = V4L2_BUF_TYPE_VIDEO_CAPTURE; //���������ͣ�����Ƶ�����豸Ӧ��V4L2_BUF_TYPE_VIDEO_CAPTURE
+    req.memory = V4L2_MEMORY_MMAP;          // V4L2_MEMORY_MMAP �� V4L2_MEMORY_USERPTR
     if (ioctl(fd, VIDIOC_REQBUFS, &req) == -1)
     {
         printf("request for buffers error\n");
         return FALSE;
     }
 
-    // 申请用户空间的地址列
+    // �����û��ռ�ĵ�ַ��
     buffers = malloc(req.count * sizeof(*buffers));
     if (!buffers)
     {
@@ -251,24 +251,24 @@ int v4l2_mem_ops()
         return FALSE;
     }
 
-    // 进行内存映射
+    // �����ڴ�ӳ��
     for (n_buffers = 0; n_buffers < FRAME_NUM; n_buffers++)
     {
         buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         buf.memory = V4L2_MEMORY_MMAP;
         buf.index = n_buffers;
-        //查询 取缓存帧的地址、长度
+        //��ѯ ȡ����֡�ĵ�ַ������
         if (ioctl(fd, VIDIOC_QUERYBUF, &buf) == -1)
         {
             printf("query buffer error\n");
             return FALSE;
         }
 
-        //映射 把buf映射到内存 buffers 用户空间的一段内存区域直接映射到内核空间。传输效率高
+        //ӳ�� ��bufӳ�䵽�ڴ� buffers �û��ռ��һ���ڴ�����ֱ��ӳ�䵽�ں˿ռ䡣����Ч�ʸ�
         buffers[n_buffers].length = buf.length;
         buffers[n_buffers].start = mmap(NULL, buf.length, PROT_READ | PROT_WRITE, MAP_SHARED, fd, buf.m.offset);
 
-        //显示缓存帧信息
+        //��ʾ����֡��Ϣ
         printf("Frame buffer %d: address=0x%p, length=%d\n", n_buffers, buffers[n_buffers].start, buffers[n_buffers].length);
         if (buffers[n_buffers].start == MAP_FAILED)
         {
@@ -290,26 +290,26 @@ int v4l2_frame_process()
     long long int cur_time = 0;
     long long int last_time = 0;
 
-    //入队和开启采集
+    //��ӺͿ����ɼ�
     for (n_buffers = 0; n_buffers < FRAME_NUM; n_buffers++)
     {
         buf.index = n_buffers;
-        ioctl(fd, VIDIOC_QBUF, &buf); //把帧放入队列 当缓存
+        ioctl(fd, VIDIOC_QBUF, &buf); //��֡������� ������
     }
     type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     ioctl(fd, VIDIOC_STREAMON, &type);
 
-    //出队，处理，写入yuv文件，入队，循环进行
+    //���ӣ�������д��yuv�ļ�����ӣ�ѭ������
     int loop = 0;
     while (loop < 6)
     {
         for (n_buffers = 0; n_buffers < FRAME_NUM; n_buffers++)
         {
-            //出队
+            //����
             buf.index = n_buffers;
-            ioctl(fd, VIDIOC_DQBUF, &buf); //取出帧
+            ioctl(fd, VIDIOC_DQBUF, &buf); //ȡ��֡
 
-            //查看采集数据的时间戳之差，单位为微妙
+            //�鿴�ɼ����ݵ�ʱ���֮���λΪ΢��
             buffers[n_buffers].timestamp = buf.timestamp.tv_sec * 1000000 + buf.timestamp.tv_usec;
             cur_time = buffers[n_buffers].timestamp;
             extra_time = cur_time - last_time;
@@ -317,7 +317,7 @@ int v4l2_frame_process()
             printf("time_deta:%lld\n\n", extra_time);
             printf("buf_len:%d\n", buffers[n_buffers].length);
 
-            //处理数据只是简单写入文件，名字以loop的次数和帧缓冲数目有关
+            //��������ֻ�Ǽ�д���ļ���������loop�Ĵ�����֡������Ŀ�й�
             printf("grab image data OK\n");
             memset(file_name, 0, sizeof(file_name));
             memset(index_str, 0, sizeof(index_str));
@@ -333,11 +333,11 @@ int v4l2_frame_process()
                 return (FALSE);
             }
             /*
-            （1）buffer：是一个指针，对fwrite来说，是要获取数据的地址；
-            （2）size：要写入内容的单字节数；
-            （3）count:要进行写入size字节的数据项的个数；
-            （4）stream:目标文件指针；
-            （5）返回实际写入的数据项个数count。
+            ��1��buffer����һ��ָ�룬��fwrite��˵����Ҫ��ȡ���ݵĵ�ַ��
+            ��2��size��Ҫд�����ݵĵ��ֽ�����
+            ��3��count:Ҫ����д��size�ֽڵ�������ĸ�����
+            ��4��stream:Ŀ���ļ�ָ�룻
+            ��5������ʵ��д������������count��
 
             */
 
@@ -345,8 +345,8 @@ int v4l2_frame_process()
             fclose(file);
             printf("save %s OK\n", file_name);
 
-            //入队循环
-            ioctl(fd, VIDIOC_QBUF, &buf); //放回帧
+            //���ѭ��
+            ioctl(fd, VIDIOC_QBUF, &buf); //�Ż�֡
         }
 
         loop++;
@@ -359,20 +359,20 @@ int v4l2_release()
     unsigned int n_buffers;
     enum v4l2_buf_type type;
 
-    //关闭流
+    //�ر���
     type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     ioctl(fd, VIDIOC_STREAMON, &type);
 
-    //关闭内存映射
+    //�ر��ڴ�ӳ��
     for (n_buffers = 0; n_buffers < FRAME_NUM; n_buffers++)
     {
         munmap(buffers[n_buffers].start, buffers[n_buffers].length);
     }
 
-    //释放自己申请的内存
+    //�ͷ��Լ�������ڴ�
     free(buffers);
 
-    //关闭设备
+    //�ر��豸
     close(fd);
     return TRUE;
 }
@@ -382,14 +382,14 @@ int v4l2_video_input_output()
     struct v4l2_input input;
     struct v4l2_standard standard;
 
-    //首先获得当前输入的index,注意只是index，要获得具体的信息，就的调用列举操作
+    //���Ȼ�õ�ǰ�����index,ע��ֻ��index��Ҫ��þ������Ϣ���͵ĵ����оٲ���
     memset(&input, 0, sizeof(input));
     if (-1 == ioctl(fd, VIDIOC_G_INPUT, &input.index))
     {
         printf("VIDIOC_G_INPUT\n");
         return FALSE;
     }
-    //调用列举操作，获得 input.index 对应的输入的具体信息
+    //�����оٲ�������� input.index ��Ӧ������ľ�����Ϣ
     if (-1 == ioctl(fd, VIDIOC_ENUMINPUT, &input))
     {
         printf("VIDIOC_ENUM_INPUT \n");
@@ -398,9 +398,9 @@ int v4l2_video_input_output()
     printf("Current input %s supports:\n", input.name);
 
 
-    //列举所有的所支持的 standard，如果 standard.id 与当前 input 的 input.std 有共同的
-    //bit flag，意味着当前的输入支持这个 standard,这样将所有驱动所支持的 standard 列举一个
-    //遍，就可以找到该输入所支持的所有 standard 了。
+    //�о����е���֧�ֵ� standard����� standard.id �뵱ǰ input �� input.std �й�ͬ��
+    //bit flag����ζ�ŵ�ǰ������֧����� standard,����������������֧�ֵ� standard �о�һ��
+    //�飬�Ϳ����ҵ���������֧�ֵ����� standard �ˡ�
 
     memset(&standard, 0, sizeof(standard));
     standard.index = 0;

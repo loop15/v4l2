@@ -53,6 +53,58 @@
  *              Hans Verkuil <hverkuil@xs4all.nl>
  *		et al.
  */
+
+
+/*
+ÎÄ×ÖÃèÊö°æÁ÷³Ì£º
+
+¡¡   (1)´ò¿ªÊÓÆµÉè±¸ÎÄ¼ş¡£int fd=open("/dev/video0",O_RDWR);
+
+¡¡¡¡(2)²éÑ¯ÊÓÆµÉè±¸µÄÄÜÁ¦£¬±ÈÈçÊÇ·ñ¾ßÓĞÊÓÆµÊäÈë,»òÕßÒôÆµÊäÈëÊä³öµÈ¡£ioctl(fd_v4l, VIDIOC_QUERYCAP, &cap)
+
+¡¡¡¡(3)ÉèÖÃÊÓÆµ²É¼¯µÄ²ÎÊı
+
+¡¡¡¡ÉèÖÃÊÓÆµµÄÖÆÊ½£¬ÖÆÊ½°üÀ¨PAL/NTSC£¬Ê¹ÓÃioctl(fd_v4l, VIDIOC_S_STD, &std_id)
+
+¡¡¡¡ÉèÖÃÊÓÆµÍ¼ÏñµÄ²É¼¯´°¿ÚµÄ´óĞ¡£¬Ê¹ÓÃioctl(fd_v4l, VIDIOC_S_CROP, &crop)
+
+¡¡¡¡ÉèÖÃÊÓÆµÖ¡¸ñÊ½£¬°üÀ¨Ö¡µÄµãÕó¸ñÊ½£¬¿í¶ÈºÍ¸ß¶ÈµÈ£¬Ê¹ÓÃioctl(fd_v4l, VIDIOC_S_FMT, &fmt)
+
+¡¡¡¡ÉèÖÃÊÓÆµµÄÖ¡ÂÊ£¬Ê¹ÓÃioctl(fd_v4l, VIDIOC_S_PARM, &parm)
+
+¡¡¡¡ÉèÖÃÊÓÆµµÄĞı×ª·½Ê½£¬Ê¹ÓÃioctl(fd_v4l, VIDIOC_S_CTRL, &ctrl)
+
+¡¡¡¡(4)ÏòÇı¶¯ÉêÇëÊÓÆµÁ÷Êı¾İµÄÖ¡»º³åÇø
+
+¡¡¡¡ÇëÇó/ÉêÇëÈô¸É¸öÖ¡»º³åÇø£¬Ò»°ãÎª²»ÉÙÓÚ3¸ö,Ê¹ÓÃioctl(fd_v4l, VIDIOC_REQBUFS, &req)
+
+¡¡¡¡²éÑ¯Ö¡»º³åÇøÔÚÄÚºË¿Õ¼äÖĞµÄ³¤¶ÈºÍÆ«ÒÆÁ¿ ioctl(fd_v4l, VIDIOC_QUERYBUF, &buf)
+
+¡¡¡¡(5)Ó¦ÓÃ³ÌĞòÍ¨¹ıÄÚ´æÓ³Éä£¬½«Ö¡»º³åÇøµÄµØÖ·Ó³Éäµ½ÓÃ»§¿Õ¼ä£¬ÕâÑù¾Í¿ÉÒÔÖ±½Ó²Ù×÷²É¼¯µ½µÄÖ¡ÁË£¬¶ø²»±ØÈ¥¸´ÖÆ¡£
+
+¡¡¡¡buffers[i].start = mmap (NULL, buffers[i].length, PROT_READ | PROT_WRITE, MAP_SHARED, fd_v4l, buffers[i].offset);
+
+¡¡¡¡(6)½«ÉêÇëµ½µÄÖ¡»º³åÈ«²¿·ÅÈëÊÓÆµ²É¼¯Êä³ö¶ÓÁĞ£¬ÒÔ±ã´æ·Å²É¼¯µÄÊı¾İ¡£ioctl (fd_v4l, VIDIOC_QBUF, &buf)
+
+¡¡¡¡(7)¿ªÊ¼ÊÓÆµÁ÷Êı¾İµÄ²É¼¯¡£ ioctl (fd_v4l, VIDIOC_STREAMON, &type)
+
+¡¡¡¡(8) Çı¶¯½«²É¼¯µ½µÄÒ»Ö¡ÊÓÆµÊı¾İ´æÈëÊäÈë¶ÓÁĞµÚÒ»¸öÖ¡»º³åÇø£¬´æÍêºó½«¸ÃÖ¡»º³åÇøÒÆÖÁÊÓÆµ²É¼¯Êä³ö¶ÓÁĞ¡£
+
+¡¡¡¡(9)Ó¦ÓÃ³ÌĞò´ÓÊÓÆµ²É¼¯Êä³ö¶ÓÁĞÖĞÈ¡³öÒÑº¬ÓĞ²É¼¯Êı¾İµÄÖ¡»º³åÇø¡£ioctl (fd_v4l, VIDIOC_DQBUF, &buf) £¬Ó¦ÓÃ³ÌĞò´¦Àí¸ÃÖ¡»º³åÇøµÄÔ­Ê¼ÊÓÆµÊı¾İ¡£
+
+¡¡¡¡(10)´¦ÀíÍêºó£¬Ó¦ÓÃ³ÌĞòµÄ½«¸ÃÖ¡»º³åÇøÖØĞÂÅÅÈëÊäÈë¶ÓÁĞ,ÕâÑù±ã¿ÉÒÔÑ­»·²É¼¯Êı¾İ¡£ioctl (fd_v4l, VIDIOC_QBUF, &buf)
+
+¡¡¡¡ÖØ¸´ÉÏÊö²½Öè8µ½10£¬Ö±µ½Í£Ö¹²É¼¯Êı¾İ¡£
+
+¡¡¡¡(11)Í£Ö¹ÊÓÆµµÄ²É¼¯¡£ioctl (fd_v4l, VIDIOC_STREAMOFF, &type)
+
+¡¡¡¡(12)ÊÍ·ÅÉêÇëµÄÊÓÆµÖ¡»º³åÇøunmap£¬¹Ø±ÕÊÓÆµÉè±¸ÎÄ¼şclose(fd_v4l)¡£
+
+¡¡¡¡ÒÔÉÏµÄ³ÌĞòÁ÷³Ì£¬°üº¬ÁËÊÓÆµÉè±¸²É¼¯Á¬ĞøµÄÊÓÆµÊı¾İµÄÂß¼­¹ØÏµ¡£¶øÔÚÊµ¼ÊÔËÓÃÖĞ£¬ÍùÍù»¹Òª¼ÓÈë¶ÔÊÓÆµÊı¾İ½øĞĞ´¦Àí(ÈçÑ¹Ëõ±àÂë)µÄ¹¤×÷£¬·ñÔò£¬ÊÓÆµÁ÷Êı¾İÁ¿Ïàµ±´ó£¬ĞèÒªºÜ´óµÄ´æ´¢¿Õ¼äºÍ´«Êä´ø¿í¡£
+
+*/
+
+
 #ifndef __LINUX_VIDEODEV2_H
 #define __LINUX_VIDEODEV2_H
 
@@ -128,6 +180,8 @@ enum v4l2_field {
 	 (field) == V4L2_FIELD_TOP ||\
 	 (field) == V4L2_FIELD_ALTERNATE)
 
+
+
 enum v4l2_buf_type {
 	V4L2_BUF_TYPE_VIDEO_CAPTURE        = 1,
 	V4L2_BUF_TYPE_VIDEO_OUTPUT         = 2,
@@ -173,8 +227,8 @@ enum v4l2_tuner_type {
 #define V4L2_TUNER_ADC  V4L2_TUNER_SDR
 
 enum v4l2_memory {
-	V4L2_MEMORY_MMAP             = 1,
-	V4L2_MEMORY_USERPTR          = 2,
+	V4L2_MEMORY_MMAP             = 1,//ÄÚ´æÓ³Éä(memory mapping)     °ÑÃ¿¸ö»º´æµÄĞÅÏ¢£¬²¢mmapµ½ÓÃ»§¿Õ¼ä
+	V4L2_MEMORY_USERPTR          = 2,//ÓÃ»§Ö¸Õë
 	V4L2_MEMORY_OVERLAY          = 3,
 	V4L2_MEMORY_DMABUF           = 4,
 };
@@ -396,14 +450,14 @@ struct v4l2_fract {
   * @device_caps:  capabilities accessed via this particular device (node)
   * @reserved:	   reserved fields for future extensions
   */
-struct v4l2_capability {
-	__u8	driver[16];
-	__u8	card[32];
-	__u8	bus_info[32];
-	__u32   version;
-	__u32	capabilities;
-	__u32	device_caps;
-	__u32	reserved[3];
+struct v4l2_capability {// ÊÓÆµÉè±¸µÄ¹¦ÄÜ£¬¶ÔÓ¦ÃüÁîVIDIOC_QUERYCAP 
+	__u8	driver[16];       // Çı¶¯Ãû×Ö
+	__u8	card[32];         // Éè±¸Ãû³Æ
+	__u8	bus_info[32];     // Éè±¸ÔÚÏµÍ³ÖĞµÄÎ»ÖÃ
+	__u32   version;          // Çı¶¯°æ±¾ºÅ
+	__u32	capabilities;     // Éè±¸¾ß±¸µÄ¹¦ÄÜ
+	__u32	device_caps;      // Í¨¹ıÌØ¶¨Éè±¸£¨½Úµã£©·ÃÎÊµÄ¹¦ÄÜ£¨²»ÖªµÀÓÃ´¦£¬ÍøÉÏÆäËü×ÊÁÏÃ»ÓĞ¸Ã×Ö¶Î£©
+	__u32	reserved[3];      // ±£Áô×Ö¶Î
 };
 
 /* Values for 'capabilities' field */
@@ -780,16 +834,19 @@ struct v4l2_jpegcompression {
 /*
  *	M E M O R Y - M A P P I N G   B U F F E R S
  */
-struct v4l2_requestbuffers {
-	__u32			count;// ç¼“å­˜æ•°é‡ï¼Œä¹Ÿå°±æ˜¯è¯´åœ¨ç¼“å­˜é˜Ÿåˆ—é‡Œä¿æŒå¤šå°‘å¼ ç…§ç‰‡
-	__u32			type;		/* enum v4l2_buf_type */ // æ•°æ®æµç±»å‹ï¼Œå¯¹è§†é¢‘æ•è·è®¾å¤‡åº”æ˜¯V4L2_BUF_TYPE_VIDEO_CAPTURE
-	__u32			memory;		/* enum v4l2_memory */ // V4L2_MEMORY_MMAP æˆ– V4L2_MEMORY_USERPTR
+ // ¶¨ÒåÁË»º´æµÄÊıÁ¿£¬Çı¶¯»á¾İ´ËÉêÇë¶ÔÓ¦ÊıÁ¿µÄÊÓÆµ»º´æ¡£¶à¸ö»º´æ¿ÉÒÔÓÃÓÚ½¨Á¢FIFO£¬À´Ìá¸ßÊÓÆµ²É¼¯µÄĞ§ÂÊ¡£
+ // ¿ØÖÆÃüÁîVIDIOC_REQBUFS
+ //¡¡ÇëÇó/ÉêÇëÈô¸É¸öÖ¡»º³åÇø£¬Ò»°ãÎª²»ÉÙÓÚ3¸ö,Ê¹ÓÃioctl(fd_v4l, VIDIOC_REQBUFS, &req)
+struct v4l2_requestbuffers { //ÉêÇëÖ¡»º³å£¬¶ÔÓ¦ÃüÁîVIDIOC_REQBUFS
+	__u32			count;             // ÒªÉêÇëµÄbufferÊı     .²»ÉÙÓÚ3
+	__u32			type;		       // enum v4l2_buf_type  Ö»ÓĞµ±memory±»ÉèÖÃÎªV4L2_MEMORY_MMAP²Å¿ÉÒÔÊ¹ÓÃ
+	__u32			memory;		       // enum v4l2_memory  ±ÈÈçÊ¹ÓÃV4L2_MEMORY_MMAPÓ³ÉäÀàĞÍ
 	__u32			reserved[2];
 };
 
 /**
  * struct v4l2_plane - plane info for multi-planar buffers
- * @bytesused:		number of bytes occupied by data in the plane (payload)
+ * @bytesused:		number of bytes occupied by data in the plane (payload)Æ½ÃæÖĞÊı¾İÕ¼ÓÃµÄ×Ö½ÚÊı£¨ÓĞĞ§¸ºÔØ£©
  * @length:		size of this plane (NOT the payload) in bytes
  * @mem_offset:		when memory in the associated struct v4l2_buffer is
  *			V4L2_MEMORY_MMAP, equals the offset from the start of
@@ -806,10 +863,36 @@ struct v4l2_requestbuffers {
  * with two planes can have one plane for Y, and another for interleaved CbCr
  * components. Each plane can reside in a separate memory buffer, or even in
  * a completely separate memory node (e.g. in embedded devices).
+ *½á¹¹v4l2_Æ½Ãæ-¶àÆ½Ãæ»º³åÇøµÄÆ½ÃæĞÅÏ¢
+ 
+ *@bytesused:Æ½ÃæÖĞÊı¾İÕ¼ÓÃµÄ×Ö½ÚÊı£¨ÓĞĞ§¸ºÔØ£©
+ 
+ *@length:´ËÆ½ÃæµÄ´óĞ¡£¨²»ÊÇÓĞĞ§¸ºÔØ£©£¬ÒÔ×Ö½ÚÎªµ¥Î»
+ 
+ *@ MySyOffice£ºµ±¹ØÁª½á¹¹V4L2a»º³åÇøÖĞµÄÄÚ´æÎª
+ 
+ *V4L2_MEMORY_MMAP£¬µÈÓÚ´Ó
+ 
+ *´ËÆ½ÃæµÄÉè±¸ÄÚ´æ£¨»òÊÇ
+ 
+ *Ó¦´«µİ¸øÔÚÊÓÆµ½ÚµãÉÏµ÷ÓÃµÄmmap£¨£©£©
+ 
+ *@userptr£ºµ±ÄÚ´æÎªV4L2\u memory\u userptrÊ±£¬ÓÃ»§¿Õ¼äÖ¸Õë
+ 
+ *Ö¸ÏòÕâ¸öÆ½Ãæ
+ 
+ *@fd:memoryÎªV4L2\u memory\u DMABUFÊ±£¬ÎªÓÃ»§¿Õ¼äÎÄ¼ş
+ 
+ *Óë´ËÆ½Ãæ¹ØÁªµÄÃèÊö·û
+ 
+ *@data_offset£ºÆ½ÃæÄÚµ½Êı¾İÆğµãµÄÆ«ÒÆ£»Í¨³£Îª0£¬
+ 
+ *³ı·ÇÊı¾İÇ°ÃæÓĞ±êÌâ
+
  */
 struct v4l2_plane {
-	__u32			bytesused;
-	__u32			length;
+	__u32			bytesused;*@bytesused:Æ½ÃæÖĞÊı¾İÕ¼ÓÃµÄ×Ö½ÚÊı£¨ÓĞĞ§¸ºÔØ£©
+	__u32			length;*@length:´ËÆ½ÃæµÄ´óĞ¡£¨²»ÊÇÓĞĞ§¸ºÔØ£©£¬ÒÔ×Ö½ÚÎªµ¥Î»
 	union {
 		__u32		mem_offset;
 		unsigned long	userptr;
@@ -848,29 +931,40 @@ struct v4l2_plane {
  *
  * Contains data exchanged by application and driver using one of the Streaming
  * I/O methods.
- */
+ */ //Çı¶¯ÖĞµÄÒ»Ö¡Í¼Ïñ»º´æ£¬¶ÔÓ¦ÃüÁîVIDIOC_QUERYBUF 
 struct v4l2_buffer {
-	__u32			index;
-	__u32			type;
-	__u32			bytesused;
-	__u32			flags;
-	__u32			field;
-	struct timeval		timestamp;
-	struct v4l2_timecode	timecode;
-	__u32			sequence;
+    // index=1, length =3133440, bytesused =3110400 = 1920 * 1080 *1.5
+
+	__u32			index;           // »º´æ±àºÅ
+	__u32			type;            // ÊÓÆµ²¶»ñÄ£Ê½ // ÕâÀïĞèÒª½âÊÍÒ»ÏÂ£¬ÒòÎªÔÚµ÷ÓÃioctl-VIDIOC_REQBUFSÊ±£¬½¨Á¢ÁËcount¸öBuffer¡£ËùÒÔ£¬ÕâÀïindexµÄÓĞĞ§·¶Î§ÊÇ£º0µ½count-1.
+	__u32			bytesused;       // Îª»º´æÒÑÊ¹ÓÃ¿Õ¼ä´óĞ¡ »º³åÇøÖĞÊı¾İÕ¼ÓÃµÄ×Ö½ÚÊı£¨ÓĞĞ§¸ºÔØ£©
+	__u32			flags;           // »º³åÇøĞÅÏ¢±êÖ¾¡¡ÖĞ£ºV4L2_BUF_FLAG_MAPPED, V4L2_BUF_FLAG_QUEUED and V4L2_BUF_FLAG_DONE±»ÉèÖÃ¡£ È·¶¨´ËÄÚ´æÓ³ÉäÄÜ·ñ±»ÆäËû½ø³Ì¹²Ïí£¬MAP_SHARED,MAP_PRIVATE
+	__u32			field;           // »º³åÇøÖĞÍ¼ÏñµÄ×Ö¶ÎË³Ğò
+	struct timeval		timestamp;   // frameÊ±¼ä´Á
+	struct v4l2_timecode	timecode;// frameÊ±¼äÂë
+	__u32			sequence;        // sequenceÎª»º´æĞòºÅ
 
 	/* memory location */
-	__u32			memory;
+	__u32			memory;       // enum v4l2_memoryÃ¶¾Ù£¬±íÊ¾ÄÚ´æÄãµÄÓ³ÉäÀàĞÍ¡£V4L2_MEMORY_MMAP±»ÉèÖÃ¡£
 	union {
-		__u32           offset;
-		unsigned long   userptr;
-		struct v4l2_plane *planes;
-		__s32		fd;
+		__u32           offset;   // µ±Ç°»º´æÓëÄÚ´æÇøÆğÊ¼µØÖ·µÄÆ«ÒÆ ¶ÔÓÚÄÚ´æÊÇ·Ç¶àÆ½Ãæ»º³åÇø£»´Ó¸ÃÆ½ÃæµÄÉè±¸ÄÚ´æ¿ªÊ¼µÄÆ«ÒÆÁ¿£¬
+		unsigned long   userptr;  // Ö¸Ïò´Ë»º³åÇøµÄÓÃ»§¿Õ¼äÖ¸Õë
+		struct v4l2_plane *planes;// ÓÃÓÚ¶àÆ½Ãæ»º³åÇø£»Ö¸ÏòÆ½ÃæÊı×éµÄÓÃ»§¿Õ¼äÖ¸Õë
+		__s32		fd;           // ¶ÔÓÚÄÚ´æ==V4L2\u memory\u DMABUFµÄ·Ç¶àÆ½Ãæ»º³åÇø£»*Óë´Ë»º³åÇø¹ØÁªµÄÓÃ»§¿Õ¼äÎÄ¼şÃèÊö·û
 	} m;
-	__u32			length;
+	__u32			length;       // length Îª»º´æ´óĞ¡ µ¥¸öÆ½ÃæµÄ»º³åÇø´óĞ¡£¨²»ÊÇËüµÄÓĞĞ§¸ºÔØ£©
 	__u32			reserved2;
 	__u32			reserved;
 };
+
+
+//addr Ó³ÉäÆğÊ¼µØÖ·£¬Ò»°ãÎªNULL £¬ÈÃÄÚºË×Ô¶¯Ñ¡Ôñ
+//length ±»Ó³ÉäÄÚ´æ¿éµÄ³¤¶È
+//prot ±êÖ¾Ó³ÉäºóÄÜ·ñ±»¶ÁĞ´£¬ÆäÖµÎªPROT_EXEC,PROT_READ,PROT_WRITE, PROT_NONE
+//flags È·¶¨´ËÄÚ´æÓ³ÉäÄÜ·ñ±»ÆäËû½ø³Ì¹²Ïí£¬MAP_SHARED,MAP_PRIVATE
+//fd,offset, È·¶¨±»Ó³ÉäµÄÄÚ´æµØÖ· ·µ»Ø³É¹¦Ó³ÉäºóµÄµØÖ·£¬²»³É¹¦·µ»ØMAP_FAILED ((void*)-1)
+//int munmap(void *addr, size_t length);// ¶Ï¿ªÓ³Éä
+//addr ÎªÓ³ÉäºóµÄµØÖ·£¬length ÎªÓ³ÉäºóµÄÄÚ´æ³¤¶È
 
 /*  Flags for 'flags' field */
 /* Buffer is mapped (flag) */
@@ -925,11 +1019,11 @@ struct v4l2_buffer {
  * content. Therefore this field should not be used for any other extensions.
  */
 struct v4l2_exportbuffer {
-	__u32		type; /* enum v4l2_buf_type */
-	__u32		index;
-	__u32		plane;
-	__u32		flags;
-	__s32		fd;
+	__u32		type;   /* enum v4l2_buf_type *///»º³åÇøÀàĞÍ
+	__u32		index;  //id»º³åÇø±àºÅ
+	__u32		plane;  //Òªµ¼³öµÄÆ½ÃæµÄË÷Òı£¬¶ÔÓÚµ¥Æ½Ãæ¶ÓÁĞÎª0
+	__u32		flags;  //ĞÂ´´½¨ÎÄ¼şµÄ±êÖ¾
+	__s32		fd;     //DMABUF¹ØÁªµÄÎÄ¼şÃèÊö·û
 	__u32		reserved[11];
 };
 
@@ -1021,7 +1115,7 @@ struct v4l2_cropcap {
 	struct v4l2_fract       pixelaspect;
 };
 
-struct v4l2_crop {
+struct v4l2_crop { //ÊÓÆµĞÅºÅ¾ØĞÎ±ß¿ò
 	__u32			type;	/* enum v4l2_buf_type */
 	struct v4l2_rect        c;
 };
@@ -1180,7 +1274,7 @@ typedef __u64 v4l2_std_id;
 #define V4L2_STD_ALL            (V4L2_STD_525_60	|\
 				 V4L2_STD_625_50)
 
-struct v4l2_standard {
+struct v4l2_standard {//ÊÓÆµµÄÖÆÊ½£¬±ÈÈçPAL£¬NTSC£¬¶ÔÓ¦ÃüÁîVIDIOC_ENUMSTD 
 	__u32		     index;
 	v4l2_std_id          id;
 	__u8		     name[24];
@@ -1383,7 +1477,7 @@ struct v4l2_dv_timings_cap {
 /*
  *	V I D E O   I N P U T S
  */
-struct v4l2_input {
+struct v4l2_input {  //ÊÓÆµÊäÈëĞÅÏ¢£¬¶ÔÓ¦ÃüÁîVIDIOC_ENUMINPUT
 	__u32	     index;		/*  Which input */
 	__u8	     name[32];		/*  Label */
 	__u32	     type;		/*  Type of input */
@@ -2000,7 +2094,7 @@ struct v4l2_sdr_format {
  * @sliced:	sliced VBI capture or output parameters
  * @raw_data:	placeholder for future extensions and custom formats
  */
-struct v4l2_format {
+struct v4l2_format { //Ö¡µÄ¸ñÊ½£¬¶ÔÓ¦ÃüÁîVIDIOC_G_FMT¡¢VIDIOC_S_FMTµÈ
 	__u32	 type;
 	union {
 		struct v4l2_pix_format		pix;     /* V4L2_BUF_TYPE_VIDEO_CAPTURE */
@@ -2182,31 +2276,106 @@ struct v4l2_create_buffers {
 #define VIDIOC_QUERYCAP		 _IOR('V',  0, struct v4l2_capability)
 #define VIDIOC_RESERVED		  _IO('V',  1)
 #define VIDIOC_ENUM_FMT         _IOWR('V',  2, struct v4l2_fmtdesc)
-#define VIDIOC_G_FMT		_IOWR('V',  4, struct v4l2_format)
-#define VIDIOC_S_FMT		_IOWR('V',  5, struct v4l2_format)
-#define VIDIOC_REQBUFS		_IOWR('V',  8, struct v4l2_requestbuffers)
-#define VIDIOC_QUERYBUF		_IOWR('V',  9, struct v4l2_buffer)
+#define VIDIOC_G_FMT	/* »ñÈ¡ÉèÖÃÖ§³ÖµÄÊÓÆµ¸ñÊ½ */	_IOWR('V',  4, struct v4l2_format)
+#define VIDIOC_S_FMT	/* ÉèÖÃ²¶»ñÊÓÆµµÄ¸ñÊ½ */	_IOWR('V',  5, struct v4l2_format)
+#define VIDIOC_REQBUFS	 /* ÏòÇı¶¯Ìá³öÉêÇëÄÚ´æµÄÇëÇó  ¶ÔÓÚ struct v4l2_requestbuffers  */	_IOWR('V',  8, struct v4l2_requestbuffers)
+
+/* 
+Ê¹ÓÃVIDIOC_REQBUFS£¬ÎÒÃÇ»ñÈ¡ÁËreq.count¸ö»º´æ£¬
+ÏÂÒ»²½Í¨¹ıµ÷ÓÃVIDIOC_QUERYBUFÃüÁîÀ´»ñÈ¡ÕâĞ©»º´æµÄµØÖ·£¬
+È»ºóÊ¹ÓÃmmapº¯Êı×ª»»³ÉÓ¦ÓÃ³ÌĞòÖĞµÄ¾ø¶ÔµØÖ·£¬×îºó°ÑÕâ¶Î»º´æ·ÅÈë»º´æ¶ÓÁĞ£º
+typedef struct VideoBuffer {
+    void   *start;
+    size_t  length;
+} VideoBuffer;
+
+VideoBuffer*          buffers = calloc( req.count, sizeof(*buffers) );
+struct v4l2_buffer    buf;
+
+for (numBufs = 0; numBufs < req.count; numBufs++) {
+    memset( &buf, 0, sizeof(buf) );
+    buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    buf.memory = V4L2_MEMORY_MMAP;
+    buf.index = numBufs;
+    // ¶ÁÈ¡»º´æ
+    if (ioctl(fd, VIDIOC_QUERYBUF, &buf) == -1) {
+        return -1;
+    }
+
+    buffers[numBufs].length = buf.length;
+    // ×ª»»³ÉÏà¶ÔµØÖ·
+    buffers[numBufs].start = mmap(NULL, buf.length,
+        PROT_READ | PROT_WRITE,
+        MAP_SHARED,
+        fd, buf.m.offset);
+    if (buffers[numBufs].start == MAP_FAILED) {
+        return -1;
+    }
+    // ¹é»¹bufferµ½¶ÓÁĞ
+    if (ioctl(fd, VIDIOC_QBUF, &buf) == -1) {
+        return -1;
+    }
+}
+*/
+
+#define VIDIOC_QUERYBUF	 /* ÏòÇı¶¯²éÑ¯ÉêÇëµ½µÄÄÚ´æ */	_IOWR('V',  9, struct v4l2_buffer)
+/*
+»ñÈ¡»º´æµÄĞÅÏ¢£¬°üÀ¨µØÖ·
+
+
+²éÑ¯Ö¡»º³åÇøÔÚÄÚºË¿Õ¼äÖĞµÄ³¤¶ÈºÍÆ«ÒÆÁ¿ ioctl(fd_v4l, VIDIOC_QUERYBUF, &buf)
+
+ÉêÇëºÃ buffer ºóÔÚ½øĞĞ memory mapped Ö®Ç°£¬Ê×ÏÈÒªÊ¹ÓÃ VIDIOC_QUERYBUF À´»ñµÃ·ÖÅäµÄ buffer ĞÅÏ¢£¬
+ÒÔ´«¸øº¯Êı mmap() À´½øĞĞ map £º
+*/
+
+
+
+
+
+
+
+
+
+
+
+
 #define VIDIOC_G_FBUF		 _IOR('V', 10, struct v4l2_framebuffer)
 #define VIDIOC_S_FBUF		 _IOW('V', 11, struct v4l2_framebuffer)
 #define VIDIOC_OVERLAY		 _IOW('V', 14, int)
-#define VIDIOC_QBUF		_IOWR('V', 15, struct v4l2_buffer)
+#define VIDIOC_QBUF		/* ½«¸Õ¸Õ´¦ÀíÍêµÄ»º³åÖØĞÂÈë¶ÓÁĞÎ²£¬ÕâÑù¿ÉÒÔÑ­»·²É¼¯*/_IOWR('V', 15, struct v4l2_buffer)
+/* ½«¿ÕÏĞµÄÄÚ´æ¼ÓÈë¿É²¶»ñÊÓÆµµÄ¶ÓÁĞ */
+
+//ispIOCtrl(VIDIOC_QBUF, &buf) ¸ù¾İbufµÄĞÅÏ¢£¬½«buf¹é»¹¸ø¶ÓÁĞ
+
+
 #define VIDIOC_EXPBUF		_IOWR('V', 16, struct v4l2_exportbuffer)
-#define VIDIOC_DQBUF		_IOWR('V', 17, struct v4l2_buffer)
-#define VIDIOC_STREAMON		 _IOW('V', 18, int)
-#define VIDIOC_STREAMOFF	 _IOW('V', 19, int)
+
+//Èç¹ûÉè±¸Ö§³Ö£¬Ò²¿ÉÒÔÊ¹ÓÃVIDIOC_EXPBUFµ¼³öbuffer£¬µÃµ½dmafd¡£
+
+
+
+
+#define VIDIOC_DQBUF	/* È¡³öFIFO»º´æÖĞÒÑ¾­²ÉÑùµÄÖ¡»º´æ*/	_IOWR('V', 17, struct v4l2_buffer)
+
+//// ÓĞÄÇÃ´¶à»º³åÇø£¬APPÈçºÎÖªµÀÄÄÒ»¸ö»º³åÇøÓĞÊı¾İ£¿  µ÷ÓÃ VIDIOC_DQBUF
+
+
+#define VIDIOC_STREAMON	/* ´ò¿ªÊÓÆµÁ÷ */	 _IOW('V', 18, int)
+#define VIDIOC_STREAMOFF/* Í£Ö¹ÊÓÆµµÄ²É¼¯ */	 _IOW('V', 19, int)
 #define VIDIOC_G_PARM		_IOWR('V', 21, struct v4l2_streamparm)
 #define VIDIOC_S_PARM		_IOWR('V', 22, struct v4l2_streamparm)
 #define VIDIOC_G_STD		 _IOR('V', 23, v4l2_std_id)
 #define VIDIOC_S_STD		 _IOW('V', 24, v4l2_std_id)
 #define VIDIOC_ENUMSTD		_IOWR('V', 25, struct v4l2_standard)
 #define VIDIOC_ENUMINPUT	_IOWR('V', 26, struct v4l2_input)
-#define VIDIOC_G_CTRL		_IOWR('V', 27, struct v4l2_control)
-#define VIDIOC_S_CTRL		_IOWR('V', 28, struct v4l2_control)
+#define VIDIOC_G_CTRL	/* »ñÈ¡µ±Ç°ÃüÁîÖµ */	_IOWR('V', 27, struct v4l2_control)
+#define VIDIOC_S_CTRL	/* ÉèÖÃĞÂµÄÃüÁîÖµ */	_IOWR('V', 28, struct v4l2_control)
 #define VIDIOC_G_TUNER		_IOWR('V', 29, struct v4l2_tuner)
 #define VIDIOC_S_TUNER		 _IOW('V', 30, struct v4l2_tuner)
 #define VIDIOC_G_AUDIO		 _IOR('V', 33, struct v4l2_audio)
 #define VIDIOC_S_AUDIO		 _IOW('V', 34, struct v4l2_audio)
-#define VIDIOC_QUERYCTRL	_IOWR('V', 36, struct v4l2_queryctrl)
+#define VIDIOC_QUERYCTRL/* ²éÑ¯Çı¶¯ÊÇ·ñÖ§³Ö¸ÃÃüÁî */	_IOWR('V', 36, struct v4l2_queryctrl)
 #define VIDIOC_QUERYMENU	_IOWR('V', 37, struct v4l2_querymenu)
 #define VIDIOC_G_INPUT		 _IOR('V', 38, int)
 #define VIDIOC_S_INPUT		_IOWR('V', 39, int)
@@ -2219,8 +2388,8 @@ struct v4l2_create_buffers {
 #define VIDIOC_S_AUDOUT		 _IOW('V', 50, struct v4l2_audioout)
 #define VIDIOC_G_MODULATOR	_IOWR('V', 54, struct v4l2_modulator)
 #define VIDIOC_S_MODULATOR	 _IOW('V', 55, struct v4l2_modulator)
-#define VIDIOC_G_FREQUENCY	_IOWR('V', 56, struct v4l2_frequency)
-#define VIDIOC_S_FREQUENCY	 _IOW('V', 57, struct v4l2_frequency)
+#define VIDIOC_G_FREQUENCY  /* »ñÈ¡µ÷Ğ³Æ÷ÆµÂÊ */	_IOWR('V', 56, struct v4l2_frequency)
+#define VIDIOC_S_FREQUENCY	/* ÉèÖÃµ÷Ğ³Æ÷ÆµÂÊ */ _IOW('V', 57, struct v4l2_frequency)
 #define VIDIOC_CROPCAP		_IOWR('V', 58, struct v4l2_cropcap)
 #define VIDIOC_G_CROP		_IOWR('V', 59, struct v4l2_crop)
 #define VIDIOC_S_CROP		 _IOW('V', 60, struct v4l2_crop)
